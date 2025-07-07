@@ -1,81 +1,245 @@
+<!DOCTYPE html>
 <html>
-<head>
-  <title>Workout History</title>
-  <link rel="stylesheet" href="styles.css" />
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
-    import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  <head>
+    <title>Workout History</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="styles.css" />
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+      import {
+        getFirestore,
+        collection,
+        getDocs,
+        query,
+        orderBy,
+      } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+      import { officialMovements } from "./movements.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyB1stVLEI3K_m2nT7oidXt46rwGaIIxnbE",
-      authDomain: "progression-logger-bd54a.firebaseapp.com",
-      projectId: "progression-logger-bd54a",
-      storageBucket: "progression-logger-bd54a.appspot.com",
-      messagingSenderId: "191611716470",
-      appId: "1:191611716470:web:8c88bb767fe6aa0aa7f057",
-      measurementId: "G-XNYV0E5J05"
-    };
+      const firebaseConfig = {
+        apiKey: "AIzaSyB1stVLEI3K_m2nT7oidXt46rwGaIIxnbE",
+        authDomain: "progression-logger-bd54a.firebaseapp.com",
+        projectId: "progression-logger-bd54a",
+        storageBucket: "progression-logger-bd54a.appspot.com",
+        messagingSenderId: "191611716470",
+        appId: "1:191611716470:web:8c88bb767fe6aa0aa7f057",
+        measurementId: "G-XNYV0E5J05",
+      };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
 
-    const listEl = document.getElementById("workout-list");
+      const tbody = document.getElementById("workout-table-body");
+      const filterBtn = document.getElementById("filter-toggle");
+      const filterBox = document.getElementById("filter-box");
+      const filterInput = document.getElementById("filter-input");
+      const suggestionBox = document.getElementById("filter-suggestions");
 
-    async function loadWorkouts() {
-      const q = query(collection(db, "workouts"), orderBy("date", "desc"));
-      const snapshot = await getDocs(q);
+      let allWorkouts = [];
 
-      if (snapshot.empty) {
-        listEl.innerHTML = "<p>No workouts logged yet.</p>";
-        return;
+      filterBtn.addEventListener("click", () => {
+        filterBox.classList.toggle("show");
+        filterInput.focus();
+      });
+
+      filterInput.addEventListener("input", () => {
+        const query = filterInput.value.toLowerCase();
+        suggestionBox.innerHTML = "";
+
+        const matches = officialMovements.filter((m) =>
+          m.toLowerCase().includes(query)
+        );
+
+        if (!query || matches.length === 0) {
+          suggestionBox.style.display = "none";
+          return;
+        }
+
+        matches.forEach((match) => {
+          const item = document.createElement("div");
+          item.textContent = match;
+          item.className = "suggestion-item";
+          item.onclick = () => {
+            filterInput.value = match;
+            suggestionBox.innerHTML = "";
+            filterTable(match);
+          };
+          suggestionBox.appendChild(item);
+        });
+
+        suggestionBox.style.display = "block";
+      });
+
+      document.addEventListener("click", (e) => {
+        if (!filterBox.contains(e.target)) {
+          suggestionBox.style.display = "none";
+        }
+      });
+
+      function filterTable(movement) {
+        tbody.innerHTML = "";
+        const filtered = allWorkouts.filter(
+          (entry) => entry.movement === movement
+        );
+
+        if (filtered.length === 0) {
+          tbody.innerHTML = "<tr><td colspan='3'>No workouts found.</td></tr>";
+        } else {
+          renderRows(filtered);
+        }
       }
 
-      snapshot.forEach(doc => {
-        const data = doc.data();
-        const item = document.createElement("div");
-        item.className = "log-item";
-        item.innerHTML = 
-          <strong>${data.movement}</strong><br>
-          Reps: ${data.reps} • Weight: ${data.weight} lb<br>
-          <small>${new Date(data.date).toLocaleString()}</small>
-        ;
-        listEl.appendChild(item);
-      });
-    }
+      function renderRows(data) {
+        tbody.innerHTML = "";
+        data.forEach((data) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${data.movement}</td>
+            <td>${data.weight}</td>
+            <td>${data.reps}</td>
+          `;
+          tbody.appendChild(row);
+        });
+      }
 
-    loadWorkouts();
-  </script>
+      async function loadWorkouts() {
+        const q = query(collection(db, "workouts"), orderBy("date", "desc"));
+        const snapshot = await getDocs(q);
 
-  <style>
-    body {
-      font-family: sans-serif;
-      max-width: 500px;
-      margin: 40px auto;
-      padding: 20px;
-      background: #fdfdfd;
-    }
+        allWorkouts = [];
 
-    h2 {
-      text-align: center;
-    }
+        if (snapshot.empty) {
+          tbody.innerHTML =
+            "<tr><td colspan='3'>No workouts logged yet.</td></tr>";
+          return;
+        }
 
-    .log-item {
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      padding: 10px 12px;
-      margin: 10px 0;
-      background: #f9f9f9;
-    }
+        snapshot.forEach((doc) => {
+          allWorkouts.push(doc.data());
+        });
 
-    small {
-      color: #666;
-    }
-  </style>
-</head>
-<body>
-  <h2>Workout History</h2>
-  <div id="workout-list">Loading...</div>
-</body>
+        renderRows(allWorkouts);
+      }
+
+      loadWorkouts();
+    </script>
+
+    <style>
+      body {
+        font-family: sans-serif;
+        max-width: 600px;
+        margin: 40px auto;
+        padding: 20px;
+        background: #fff;
+      }
+
+      h2 {
+        text-align: center;
+        margin-bottom: 10px;
+      }
+
+      .filter-wrapper {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 10px;
+      }
+
+      #filter-toggle {
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        padding: 8px 14px;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        cursor: pointer;
+      }
+
+      #filter-box {
+        display: none;
+        flex-direction: column;
+        position: relative;
+        margin: 10px 0;
+      }
+
+      #filter-box.show {
+        display: flex;
+      }
+
+      #filter-input {
+        padding: 10px;
+        font-size: 1rem;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+      }
+
+      #filter-suggestions {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        z-index: 10;
+        background: white;
+        border: 1px solid #ccc;
+        border-top: none;
+        display: none;
+        max-height: 160px;
+        overflow-y: auto;
+      }
+
+      .suggestion-item {
+        padding: 10px;
+        cursor: pointer;
+      }
+
+      .suggestion-item:hover {
+        background-color: #f0f0f0;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+
+      th,
+      td {
+        border: 1px solid #ddd;
+        padding: 12px;
+        text-align: left;
+      }
+
+      th {
+        background-color: #f4f4f4;
+        font-weight: bold;
+      }
+
+      tr:nth-child(even) {
+        background-color: #fafafa;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Workout History</h2>
+    <div class="filter-wrapper">
+      <button id="filter-toggle">Filter</button>
+    </div>
+    <div id="filter-box">
+      <input
+        type="text"
+        id="filter-input"
+        placeholder="Type to filter by movement..."
+      />
+      <div id="filter-suggestions"></div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Movement</th>
+          <th>Weight</th>
+          <th>Reps</th>
+        </tr>
+      </thead>
+      <tbody id="workout-table-body"></tbody>
+    </table>
+  </body>
 </html>
-
-
