@@ -13,7 +13,6 @@
         query,
         orderBy,
       } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
-      import { officialMovements } from "./movements.js";
 
       const firebaseConfig = {
         apiKey: "AIzaSyB1stVLEI3K_m2nT7oidXt46rwGaIIxnbE",
@@ -29,76 +28,55 @@
       const db = getFirestore(app);
 
       const tbody = document.getElementById("workout-table-body");
-      const filterBtn = document.getElementById("filter-toggle");
-      const filterBox = document.getElementById("filter-box");
-      const filterInput = document.getElementById("filter-input");
-      const suggestionBox = document.getElementById("filter-suggestions");
-
       let allWorkouts = [];
-
-      filterBtn.addEventListener("click", () => {
-        filterBox.classList.toggle("show");
-        filterInput.focus();
-      });
-
-      filterInput.addEventListener("input", () => {
-        const query = filterInput.value.toLowerCase();
-        suggestionBox.innerHTML = "";
-
-        const matches = officialMovements.filter((m) =>
-          m.toLowerCase().includes(query)
-        );
-
-        if (!query || matches.length === 0) {
-          suggestionBox.style.display = "none";
-          return;
-        }
-
-        matches.forEach((match) => {
-          const item = document.createElement("div");
-          item.textContent = match;
-          item.className = "suggestion-item";
-          item.onclick = () => {
-            filterInput.value = match;
-            suggestionBox.innerHTML = "";
-            filterTable(match);
-          };
-          suggestionBox.appendChild(item);
-        });
-
-        suggestionBox.style.display = "block";
-      });
-
-      document.addEventListener("click", (e) => {
-        if (!filterBox.contains(e.target)) {
-          suggestionBox.style.display = "none";
-        }
-      });
-
-      function filterTable(movement) {
-        tbody.innerHTML = "";
-        const filtered = allWorkouts.filter(
-          (entry) => entry.movement === movement
-        );
-
-        if (filtered.length === 0) {
-          tbody.innerHTML = "<tr><td colspan='3'>No workouts found.</td></tr>";
-        } else {
-          renderRows(filtered);
-        }
-      }
 
       function renderRows(data) {
         tbody.innerHTML = "";
-        data.forEach((data) => {
+        const total = data.length;
+
+        data.forEach((entry, index) => {
           const row = document.createElement("tr");
           row.innerHTML = `
-            <td>${data.movement}</td>
-            <td>${data.weight}</td>
-            <td>${data.reps}</td>
+            <td>${total - index}</td>
+            <td>${entry.movement}</td>
+            <td>${entry.weight}</td>
+            <td>${entry.reps}</td>
           `;
+
+          row.addEventListener("click", () => {
+            showPopup(entry);
+          });
+
           tbody.appendChild(row);
         });
+      }
+
+      function showPopup(clickedEntry) {
+        const popup = document.getElementById("popup");
+        const popupTimestamp = document.getElementById("popup-timestamp");
+        const progressionList = document.getElementById("progression-list");
+
+        const timestamp = new Date(clickedEntry.date).toLocaleString();
+        popupTimestamp.textContent = `Logged at: ${timestamp}`;
+
+        const relatedEntries = allWorkouts
+          .filter((entry) => entry.movement === clickedEntry.movement)
+          .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+        progressionList.innerHTML = "";
+        relatedEntries.forEach((entry) => {
+          const item = document.createElement("li");
+          item.textContent = `${new Date(entry.date).toLocaleDateString()}: ${
+            entry.weight
+          } lbs x ${entry.reps}`;
+          progressionList.appendChild(item);
+        });
+
+        popup.style.display = "flex";
+
+        document.getElementById("close-popup").onclick = () => {
+          popup.style.display = "none";
+        };
       }
 
       async function loadWorkouts() {
@@ -109,7 +87,7 @@
 
         if (snapshot.empty) {
           tbody.innerHTML =
-            "<tr><td colspan='3'>No workouts logged yet.</td></tr>";
+            "<tr><td colspan='4'>No workouts logged yet.</td></tr>";
           return;
         }
 
@@ -122,118 +100,16 @@
 
       loadWorkouts();
     </script>
-
-    <style>
-      body {
-        font-family: sans-serif;
-        max-width: 600px;
-        margin: 40px auto;
-        padding: 20px;
-        background: #fff;
-      }
-
-      h2 {
-        text-align: center;
-        margin-bottom: 10px;
-      }
-
-      .filter-wrapper {
-        display: flex;
-        justify-content: flex-end;
-        margin-bottom: 10px;
-      }
-
-      #filter-toggle {
-        background-color: #4caf50;
-        color: white;
-        border: none;
-        padding: 8px 14px;
-        border-radius: 6px;
-        font-size: 0.9rem;
-        cursor: pointer;
-      }
-
-      #filter-box {
-        display: none;
-        flex-direction: column;
-        position: relative;
-        margin: 10px 0;
-      }
-
-      #filter-box.show {
-        display: flex;
-      }
-
-      #filter-input {
-        padding: 10px;
-        font-size: 1rem;
-        border: 1px solid #ccc;
-        border-radius: 6px;
-      }
-
-      #filter-suggestions {
-        position: absolute;
-        top: 100%;
-        left: 0;
-        right: 0;
-        z-index: 10;
-        background: white;
-        border: 1px solid #ccc;
-        border-top: none;
-        display: none;
-        max-height: 160px;
-        overflow-y: auto;
-      }
-
-      .suggestion-item {
-        padding: 10px;
-        cursor: pointer;
-      }
-
-      .suggestion-item:hover {
-        background-color: #f0f0f0;
-      }
-
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 20px;
-      }
-
-      th,
-      td {
-        border: 1px solid #ddd;
-        padding: 12px;
-        text-align: left;
-      }
-
-      th {
-        background-color: #f4f4f4;
-        font-weight: bold;
-      }
-
-      tr:nth-child(even) {
-        background-color: #fafafa;
-      }
-    </style>
   </head>
   <body>
-    <h2>Workout History</h2>
-    <div class="filter-wrapper">
-      <button id="filter-toggle">Filter</button>
-    </div>
-    <div id="filter-box">
-      <input
-        type="text"
-        id="filter-input"
-        placeholder="Type to filter by movement..."
-      />
-      <div id="filter-suggestions"></div>
-    </div>
+    <h2>Workout Log</h2>
+
+    <a href="index.html" class="page-switch">Back</a>
 
     <table>
       <thead>
         <tr>
+          <th>#</th>
           <th>Movement</th>
           <th>Weight</th>
           <th>Reps</th>
@@ -241,5 +117,15 @@
       </thead>
       <tbody id="workout-table-body"></tbody>
     </table>
+    <!-- Popup -->
+    <div id="popup" class="popup-overlay" style="display: none">
+      <div class="popup-content">
+        <span id="close-popup" class="close-button">&times;</span>
+        <h3>Workout Details</h3>
+        <p id="popup-timestamp"></p>
+        <h4>Progression</h4>
+        <ul id="progression-list"></ul>
+      </div>
+    </div>
   </body>
 </html>

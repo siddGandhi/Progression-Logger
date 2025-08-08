@@ -3,60 +3,13 @@
   <head>
     <title>Progression Log</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <style>
-      body {
-        font-family: sans-serif;
-        max-width: 400px;
-        margin: 40px auto;
-        padding: 20px;
-      }
-
-      input,
-      button {
-        width: 100%;
-        padding: 10px;
-        margin: 10px 0;
-        font-size: 1rem;
-        border-radius: 6px;
-        border: 1px solid #ccc;
-      }
-
-      button {
-        background-color: #4caf50;
-        color: white;
-        border: none;
-        cursor: pointer;
-      }
-
-      #suggestions {
-        border: 1px solid #ccc;
-        border-radius: 0 0 6px 6px;
-        border-top: none;
-        background: #fff;
-        max-height: 150px;
-        overflow-y: auto;
-        display: none;
-        position: absolute;
-        width: 100%;
-        z-index: 10;
-      }
-
-      .suggestion-item {
-        padding: 8px 10px;
-        cursor: pointer;
-      }
-
-      .suggestion-item:hover {
-        background-color: #f0f0f0;
-      }
-
-      .field-container {
-        position: relative;
-      }
-    </style>
   </head>
   <body>
+    <link rel="stylesheet" href="styles.css" />
     <h2>Workout Logger</h2>
+
+    <a href="view.html" class="page-switch">View Logs</a>
+
     <form id="logForm">
       <div class="field-container">
         <input
@@ -68,8 +21,20 @@
         />
         <div id="suggestions"></div>
       </div>
-      <input type="number" id="reps" placeholder="Reps" required />
-      <input type="number" id="weight" placeholder="Weight" required />
+      <input
+        type="number"
+        inputmode="numeric"
+        id="reps"
+        placeholder="Reps"
+        required
+      />
+      <input
+        type="number"
+        inputmode="numeric"
+        id="weight"
+        placeholder="Weight"
+        required
+      />
       <button type="submit">Log Workout</button>
     </form>
     <p id="response"></p>
