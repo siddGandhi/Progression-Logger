@@ -33,7 +33,7 @@ export const workoutService = {
         const docData = {
             movement,
             reps: Number(reps),
-            weight: Number(weight),
+            weight: parseFloat(weight),
             date: new Date().toISOString(),
             isFirstOfDay: isFirst // The new boolean flag
         };

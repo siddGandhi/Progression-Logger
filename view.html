@@ -80,7 +80,7 @@
         }
 
         data.forEach((entry, index) => {
-          // 1. Check if this is the first entry of a gym session
+          // 1. ADD THE BAR FIRST: Check the boolean from the database immediately
           if (entry.isFirstOfDay) {
             const dateHeader = document.createElement("tr");
             const dateString = new Date(entry.date).toLocaleDateString(undefined, {
@@ -89,22 +89,21 @@
               day: 'numeric'
             });
             
-            // This row acts as the "Bar" or header for the day
             dateHeader.innerHTML = `
               <td colspan="5" class="date-divider-row">
-                📅 ${dateString}
+                ${dateString}
               </td>
             `;
             tbody.appendChild(dateHeader);
           }
 
-          // 2. Create the standard workout row
+          // 2. THEN ADD THE WORKOUT: Create the standard row after the bar
           const row = document.createElement("tr");
 
           row.innerHTML = `
             <td>${total - index}</td>
             <td>${entry.movement}</td>
-            <td>${entry.weight} lbs</td>
+            <td>${parseFloat(entry.weight).toFixed(1)} lbs</td>
             <td>${entry.reps}</td>
             <td class="actions-cell">
               <button class="menu-btn"><span></span><span></span><span></span></button>
@@ -114,12 +113,12 @@
             </td>
           `;
 
-          // Event: Row click for details
+          // Row click for details
           row.addEventListener("click", (e) => {
             if (!e.target.closest(".actions-cell")) showPopup(entry);
           });
 
-          // Event: Dropdown toggle
+          // Dropdown toggle
           const menuBtn = row.querySelector(".menu-btn");
           menuBtn.addEventListener("click", (e) => {
             e.stopPropagation();
@@ -129,7 +128,7 @@
             if (!isOpen) dropdown.classList.add("show");
           });
 
-          // Event: Delete click
+          // Delete click
           row.querySelector(".delete-action").addEventListener("click", async (e) => {
             e.preventDefault();
             e.stopPropagation();
