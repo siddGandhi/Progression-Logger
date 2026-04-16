@@ -1,105 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <title>Workout History</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="styles.css" />
-    <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
-      import {
-        getFirestore,
-        collection,
-        getDocs,
-        query,
-        orderBy,
-      } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
-
-      const firebaseConfig = {
-        apiKey: "AIzaSyB1stVLEI3K_m2nT7oidXt46rwGaIIxnbE",
-        authDomain: "progression-logger-bd54a.firebaseapp.com",
-        projectId: "progression-logger-bd54a",
-        storageBucket: "progression-logger-bd54a.appspot.com",
-        messagingSenderId: "191611716470",
-        appId: "1:191611716470:web:8c88bb767fe6aa0aa7f057",
-        measurementId: "G-XNYV0E5J05",
-      };
-
-      const app = initializeApp(firebaseConfig);
-      const db = getFirestore(app);
-
-      const tbody = document.getElementById("workout-table-body");
-      let allWorkouts = [];
-
-      function renderRows(data) {
-        tbody.innerHTML = "";
-        const total = data.length;
-
-        data.forEach((entry, index) => {
-          const row = document.createElement("tr");
-          row.innerHTML = `
-            <td>${total - index}</td>
-            <td>${entry.movement}</td>
-            <td>${entry.weight}</td>
-            <td>${entry.reps}</td>
-          `;
-
-          row.addEventListener("click", () => {
-            showPopup(entry);
-          });
-
-          tbody.appendChild(row);
-        });
-      }
-
-      function showPopup(clickedEntry) {
-        const popup = document.getElementById("popup");
-        const popupTimestamp = document.getElementById("popup-timestamp");
-        const progressionList = document.getElementById("progression-list");
-
-        const timestamp = new Date(clickedEntry.date).toLocaleString();
-        popupTimestamp.textContent = `Logged at: ${timestamp}`;
-
-        const relatedEntries = allWorkouts
-          .filter((entry) => entry.movement === clickedEntry.movement)
-          .sort((a, b) => new Date(a.date) - new Date(b.date));
-
-        progressionList.innerHTML = "";
-        relatedEntries.forEach((entry) => {
-          const item = document.createElement("li");
-          item.textContent = `${new Date(entry.date).toLocaleDateString()}: ${
-            entry.weight
-          } lbs x ${entry.reps}`;
-          progressionList.appendChild(item);
-        });
-
-        popup.style.display = "flex";
-
-        document.getElementById("close-popup").onclick = () => {
-          popup.style.display = "none";
-        };
-      }
-
-      async function loadWorkouts() {
-        const q = query(collection(db, "workouts"), orderBy("date", "desc"));
-        const snapshot = await getDocs(q);
-
-        allWorkouts = [];
-
-        if (snapshot.empty) {
-          tbody.innerHTML =
-            "<tr><td colspan='4'>No workouts logged yet.</td></tr>";
-          return;
-        }
-
-        snapshot.forEach((doc) => {
-          allWorkouts.push(doc.data());
-        });
-
-        renderRows(allWorkouts);
-      }
-
-      loadWorkouts();
-    </script>
   </head>
   <body>
     <h2>Workout Log</h2>
@@ -113,19 +17,156 @@
           <th>Movement</th>
           <th>Weight</th>
           <th>Reps</th>
+          <th>Actions</th>
         </tr>
       </thead>
-      <tbody id="workout-table-body"></tbody>
+      <tbody id="workout-table-body">
+        </tbody>
     </table>
-    <!-- Popup -->
-    <div id="popup" class="popup-overlay" style="display: none">
+
+    <div id="popup" class="popup-overlay">
       <div class="popup-content">
         <span id="close-popup" class="close-button">&times;</span>
         <h3>Workout Details</h3>
         <p id="popup-timestamp"></p>
-        <h4>Progression</h4>
+        <h4>Progression History</h4>
         <ul id="progression-list"></ul>
       </div>
     </div>
+
+    <script type="module">
+      import { workoutService } from "./db-service.js";
+
+      const tbody = document.getElementById("workout-table-body");
+      const popup = document.getElementById("popup");
+      let allWorkouts = [];
+
+      // --- UI Helper Functions ---
+
+      function closeAllDropdowns() {
+        document.querySelectorAll(".dropdown-menu.show").forEach((menu) => {
+          menu.classList.remove("show");
+        });
+      }
+
+      window.addEventListener("click", (e) => {
+        if (!e.target.matches(".menu-btn") && !e.target.closest(".menu-btn")) {
+          closeAllDropdowns();
+        }
+        if (e.target === popup) {
+          popup.classList.remove("active");
+        }
+      });
+
+      // --- Data Fetching & Rendering ---
+
+      async function loadAndRender() {
+        try {
+          allWorkouts = await workoutService.getAllWorkouts();
+          renderRows(allWorkouts);
+        } catch (error) {
+          console.error("Failed to load workouts:", error);
+          tbody.innerHTML = "<tr><td colspan='5'>Error loading data.</td></tr>";
+        }
+      }
+
+      function renderRows(data) {
+        tbody.innerHTML = "";
+        const total = data.length;
+
+        if (total === 0) {
+          tbody.innerHTML = "<tr><td colspan='5' style='text-align:center;'>No workouts logged yet.</td></tr>";
+          return;
+        }
+
+        data.forEach((entry, index) => {
+          // 1. Check if this is the first entry of a gym session
+          if (entry.isFirstOfDay) {
+            const dateHeader = document.createElement("tr");
+            const dateString = new Date(entry.date).toLocaleDateString(undefined, {
+              weekday: 'long',
+              month: 'long',
+              day: 'numeric'
+            });
+            
+            // This row acts as the "Bar" or header for the day
+            dateHeader.innerHTML = `
+              <td colspan="5" class="date-divider-row">
+                📅 ${dateString}
+              </td>
+            `;
+            tbody.appendChild(dateHeader);
+          }
+
+          // 2. Create the standard workout row
+          const row = document.createElement("tr");
+
+          row.innerHTML = `
+            <td>${total - index}</td>
+            <td>${entry.movement}</td>
+            <td>${entry.weight} lbs</td>
+            <td>${entry.reps}</td>
+            <td class="actions-cell">
+              <button class="menu-btn"><span></span><span></span><span></span></button>
+              <div class="dropdown-menu">
+                <a href="#" class="dropdown-item delete-action">Delete</a>
+              </div>
+            </td>
+          `;
+
+          // Event: Row click for details
+          row.addEventListener("click", (e) => {
+            if (!e.target.closest(".actions-cell")) showPopup(entry);
+          });
+
+          // Event: Dropdown toggle
+          const menuBtn = row.querySelector(".menu-btn");
+          menuBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const dropdown = menuBtn.nextElementSibling;
+            const isOpen = dropdown.classList.contains("show");
+            closeAllDropdowns();
+            if (!isOpen) dropdown.classList.add("show");
+          });
+
+          // Event: Delete click
+          row.querySelector(".delete-action").addEventListener("click", async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (confirm("Are you sure you want to delete this log?")) {
+              await workoutService.deleteWorkout(entry.id);
+              loadAndRender();
+            }
+          });
+
+          tbody.appendChild(row);
+        });
+      }
+
+      function showPopup(clickedEntry) {
+        const popupTimestamp = document.getElementById("popup-timestamp");
+        const progressionList = document.getElementById("progression-list");
+        
+        popupTimestamp.textContent = `Logged at: ${new Date(clickedEntry.date).toLocaleString()}`;
+
+        const relatedEntries = allWorkouts
+          .filter((e) => e.movement === clickedEntry.movement)
+          .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+        progressionList.innerHTML = "";
+        relatedEntries.forEach((e) => {
+          const item = document.createElement("li");
+          item.textContent = `${new Date(e.date).toLocaleDateString()}: ${e.weight} lbs x ${e.reps}`;
+          progressionList.appendChild(item);
+        });
+
+        popup.classList.add("active");
+      }
+
+      document.getElementById("close-popup").onclick = () => popup.classList.remove("active");
+
+      // Initial Load
+      loadAndRender();
+    </script>
   </body>
 </html>
