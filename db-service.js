@@ -5,8 +5,6 @@ import {
     addDoc,
     getDocs,
     query,
-    where,
-    limit,
     orderBy,
     doc,
     deleteDoc
@@ -15,29 +13,14 @@ import {
 const WORKOUT_COLLECTION = "workouts";
 
 export const workoutService = {
-    // Add a workout with "First of Day" detection
+    // Add a simple workout log
     async addWorkout(movement, reps, weight) {
-        const now = new Date();
-        const startOfDay = new Date(now.setHours(0, 0, 0, 0)).toISOString();
-
-        // Check if a workout has already been logged today
-        const q = query(
-            collection(db, WORKOUT_COLLECTION),
-            where("date", ">=", startOfDay),
-            limit(1)
-        );
-
-        const existingLogs = await getDocs(q);
-        const isFirst = existingLogs.empty;
-
         const docData = {
             movement,
             reps: Number(reps),
             weight: parseFloat(weight),
-            date: new Date().toISOString(),
-            isFirstOfDay: isFirst // The new boolean flag
+            date: new Date().toISOString()
         };
-
         return await addDoc(collection(db, WORKOUT_COLLECTION), docData);
     },
 

@@ -122,46 +122,6 @@ button:active {
   position: relative;
 }
 
-/* Popup Styles */
-.popup-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.6);
-  display: none;
-  /* Controlled by JS or utility class */
-  align-items: center;
-  justify-content: center;
-  z-index: 100;
-  backdrop-filter: blur(2px);
-}
-
-/* Added a helper class for JS to toggle popup */
-.popup-overlay.active {
-  display: flex;
-}
-
-.popup-content {
-  background: white;
-  padding: 24px;
-  border-radius: 12px;
-  max-width: 400px;
-  width: 90%;
-  position: relative;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-}
-
-.close-button {
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  font-size: 1.5rem;
-  cursor: pointer;
-  color: #999;
-}
-
 #progression-list {
   padding-left: 20px;
   margin-top: 15px;
@@ -276,4 +236,59 @@ button:active {
 /* Prevents hover effects on the header row */
 tr:has(.date-divider-row):hover {
   background-color: #f8f9fa !important;
+}
+
+.session-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+
+#nextSessionBtn {
+  flex: 2;
+  background-color: #2ecc71;
+  /* Green for session progress */
+  margin: 0;
+}
+
+#nextSessionBtn:hover {
+  background-color: #27ae60;
+}
+
+.session-display {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  background: #f8f9fa;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 0 10px;
+  height: 48px;
+  /* Match button height */
+}
+
+.session-display span {
+  color: #888;
+  font-weight: bold;
+  margin-right: 5px;
+}
+
+#sessionNum {
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  text-align: center;
+  font-weight: 600;
+  color: #333;
+  cursor: default;
+}
+
+#sessionNum:focus {
+  outline: none;
+  box-shadow: none;
 }

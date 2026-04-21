@@ -3,9 +3,9 @@
   <head>
     <title>Progression Log</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <link rel="stylesheet" href="styles.css" />
     <h2>Workout Logger</h2>
 
     <a href="view.html" class="page-switch">View Logs</a>
@@ -29,8 +29,8 @@
         required
       />
       <input
-        type="decimal"
-        inputmode="numeric"
+        type="number"
+        inputmode="decimal"
         id="weight"
         placeholder="Weight"
         step="0.5"
@@ -38,11 +38,12 @@
       />
       <button type="submit">Log Workout</button>
     </form>
+
     <p id="response"></p>
 
     <script type="module">
       import { officialMovements } from "./movements.js";
-      import { workoutService } from "./db-service.js"; // Import the service
+      import { workoutService } from "./db-service.js";
 
       const form = document.getElementById("logForm");
       const movementInput = document.getElementById("movement");
@@ -55,26 +56,52 @@
 
         const enteredMovement = movementInput.value.trim();
         if (!officialMovements.includes(enteredMovement)) {
-          response.textContent = "❌ Invalid movement. Please select from the list.";
+          response.textContent = "Invalid movement. Please select from the list.";
           return;
         }
 
         try {
-          // Call the modular service
           await workoutService.addWorkout(
             enteredMovement, 
             repsInput.value, 
             weightInput.value
           );
           
-          response.textContent = "✅ Workout logged!";
+          response.textContent = "Workout logged!";
           form.reset();
         } catch (err) {
-          response.textContent = "❌ Error: " + err.message;
+          response.textContent = "Error: " + err.message;
         }
       });
-      
-      // ... (keep your autocomplete/suggestions code here)
+
+      // --- Suggestions Logic ---
+      const suggestionsBox = document.getElementById("suggestions");
+
+      movementInput.addEventListener("input", () => {
+        const val = movementInput.value.toLowerCase();
+        suggestionsBox.innerHTML = "";
+        if (!val) {
+          suggestionsBox.style.display = "none";
+          return;
+        }
+
+        const filtered = officialMovements.filter(m => m.toLowerCase().includes(val));
+        if (filtered.length > 0) {
+          filtered.forEach(m => {
+            const div = document.createElement("div");
+            div.className = "suggestion-item";
+            div.textContent = m;
+            div.onclick = () => {
+              movementInput.value = m;
+              suggestionsBox.style.display = "none";
+            };
+            suggestionsBox.appendChild(div);
+          });
+          suggestionsBox.style.display = "block";
+        } else {
+          suggestionsBox.style.display = "none";
+        }
+      });
     </script>
   </body>
 </html>

@@ -24,21 +24,10 @@
         </tbody>
     </table>
 
-    <div id="popup" class="popup-overlay">
-      <div class="popup-content">
-        <span id="close-popup" class="close-button">&times;</span>
-        <h3>Workout Details</h3>
-        <p id="popup-timestamp"></p>
-        <h4>Progression History</h4>
-        <ul id="progression-list"></ul>
-      </div>
-    </div>
-
     <script type="module">
       import { workoutService } from "./db-service.js";
 
       const tbody = document.getElementById("workout-table-body");
-      const popup = document.getElementById("popup");
       let allWorkouts = [];
 
       // --- UI Helper Functions ---
@@ -48,15 +37,6 @@
           menu.classList.remove("show");
         });
       }
-
-      window.addEventListener("click", (e) => {
-        if (!e.target.matches(".menu-btn") && !e.target.closest(".menu-btn")) {
-          closeAllDropdowns();
-        }
-        if (e.target === popup) {
-          popup.classList.remove("active");
-        }
-      });
 
       // --- Data Fetching & Rendering ---
 
@@ -80,24 +60,6 @@
         }
 
         data.forEach((entry, index) => {
-          // 1. ADD THE BAR FIRST: Check the boolean from the database immediately
-          if (entry.isFirstOfDay) {
-            const dateHeader = document.createElement("tr");
-            const dateString = new Date(entry.date).toLocaleDateString(undefined, {
-              weekday: 'long',
-              month: 'long',
-              day: 'numeric'
-            });
-            
-            dateHeader.innerHTML = `
-              <td colspan="5" class="date-divider-row">
-                ${dateString}
-              </td>
-            `;
-            tbody.appendChild(dateHeader);
-          }
-
-          // 2. THEN ADD THE WORKOUT: Create the standard row after the bar
           const row = document.createElement("tr");
 
           row.innerHTML = `
@@ -113,12 +75,6 @@
             </td>
           `;
 
-          // Row click for details
-          row.addEventListener("click", (e) => {
-            if (!e.target.closest(".actions-cell")) showPopup(entry);
-          });
-
-          // Dropdown toggle
           const menuBtn = row.querySelector(".menu-btn");
           menuBtn.addEventListener("click", (e) => {
             e.stopPropagation();
@@ -128,7 +84,6 @@
             if (!isOpen) dropdown.classList.add("show");
           });
 
-          // Delete click
           row.querySelector(".delete-action").addEventListener("click", async (e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -141,28 +96,6 @@
           tbody.appendChild(row);
         });
       }
-
-      function showPopup(clickedEntry) {
-        const popupTimestamp = document.getElementById("popup-timestamp");
-        const progressionList = document.getElementById("progression-list");
-        
-        popupTimestamp.textContent = `Logged at: ${new Date(clickedEntry.date).toLocaleString()}`;
-
-        const relatedEntries = allWorkouts
-          .filter((e) => e.movement === clickedEntry.movement)
-          .sort((a, b) => new Date(a.date) - new Date(b.date));
-
-        progressionList.innerHTML = "";
-        relatedEntries.forEach((e) => {
-          const item = document.createElement("li");
-          item.textContent = `${new Date(e.date).toLocaleDateString()}: ${e.weight} lbs x ${e.reps}`;
-          progressionList.appendChild(item);
-        });
-
-        popup.classList.add("active");
-      }
-
-      document.getElementById("close-popup").onclick = () => popup.classList.remove("active");
 
       // Initial Load
       loadAndRender();
