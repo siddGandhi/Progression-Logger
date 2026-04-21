@@ -60,6 +60,26 @@
         }
 
         data.forEach((entry, index) => {
+          
+          if (entry.movement === "DAILY_MARKER") {
+            const bannerRow = document.createElement("tr");
+            
+            // Format the date for the banner text
+            const dateText = new Date(entry.date).toLocaleDateString(undefined, {
+              weekday: 'long',
+              month: 'long',
+              day: 'numeric'
+            });
+
+            bannerRow.innerHTML = `
+              <td colspan="5" class="date-divider-row">
+                Workout — ${dateText}
+              </td>
+            `;
+            tbody.appendChild(bannerRow);
+            return; // Skip the rest of the loop for this entry
+          }
+          
           const row = document.createElement("tr");
 
           row.innerHTML = `

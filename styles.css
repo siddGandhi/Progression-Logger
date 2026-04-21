@@ -292,3 +292,23 @@ tr:has(.date-divider-row):hover {
   outline: none;
   box-shadow: none;
 }
+
+/* Styles the banner text and background */
+.date-divider-row {
+  background-color: #f8f9fa;
+  color: #2c3e50;
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  text-align: center;
+  letter-spacing: 0.5px;
+  padding: 15px !important;
+  border-left: 5px solid #3498db;
+  /* The blue accent bar */
+  cursor: default !important;
+}
+
+/* Removes hover highlight for the banner row */
+tr:has(.date-divider-row):hover {
+  background-color: #f8f9fa !important;
+}
