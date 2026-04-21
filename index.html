@@ -80,17 +80,22 @@
       movementInput.addEventListener("input", () => {
         const val = movementInput.value.toLowerCase();
         suggestionsBox.innerHTML = "";
+        
         if (!val) {
           suggestionsBox.style.display = "none";
           return;
         }
 
+        // Filter movements from movements.js
         const filtered = officialMovements.filter(m => m.toLowerCase().includes(val));
+        
         if (filtered.length > 0) {
           filtered.forEach(m => {
             const div = document.createElement("div");
             div.className = "suggestion-item";
             div.textContent = m;
+            
+            // When a user clicks a suggestion
             div.onclick = () => {
               movementInput.value = m;
               suggestionsBox.style.display = "none";
@@ -99,6 +104,13 @@
           });
           suggestionsBox.style.display = "block";
         } else {
+          suggestionsBox.style.display = "none";
+        }
+      });
+
+      // Close the suggestions if the user clicks anywhere else
+      window.addEventListener("click", (e) => {
+        if (e.target !== movementInput) {
           suggestionsBox.style.display = "none";
         }
       });
