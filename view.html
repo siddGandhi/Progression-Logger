@@ -31,41 +31,15 @@
         </tr>
       </thead>
       <tbody id="workout-table-body">
-        </tbody>
+      </tbody>
     </table>
 
     <script type="module">
-
-      // Add these variables at the top of your script
-      const searchInput = document.getElementById("historySearch");
-      const clearBtn = document.getElementById("clearSearch");
-
-      // Filter function
-      searchInput.addEventListener("input", () => {
-        const searchTerm = searchInput.value.toLowerCase();
-        
-        // Filter the existing data array
-        const filteredData = allWorkouts.filter(entry => {
-          // Only search through actual workouts, skip banners
-          return entry.movement && 
-                entry.movement !== "DAILY_MARKER" && 
-                entry.movement.toLowerCase().includes(searchTerm);
-        });
-
-        // Re-render the table with the filtered results
-        renderRows(filteredData);
-      });
-
-      // Clear button logic
-      clearBtn.addEventListener("click", () => {
-        searchInput.value = "";
-        renderRows(allWorkouts); // Restore the original view
-      });
-
       import { workoutService } from "./db-service.js";
 
       const tbody = document.getElementById("workout-table-body");
-      const weightInput = document.getElementById("weight");
+      const searchInput = document.getElementById("historySearch");
+      const clearBtn = document.getElementById("clearSearch");
       let allWorkouts = [];
 
       // --- UI Helper Functions ---
@@ -75,6 +49,31 @@
           menu.classList.remove("show");
         });
       }
+
+      // GLOBAL CLICK LISTENER: Detects clicks outside the menu
+      document.addEventListener("click", (e) => {
+        // If the user clicks something that ISN'T the menu button or the menu itself...
+        if (!e.target.closest(".menu-btn") && !e.target.closest(".dropdown-menu")) {
+          closeAllDropdowns();
+        }
+      });
+
+      // --- Search Logic ---
+
+      searchInput.addEventListener("input", () => {
+        const searchTerm = searchInput.value.toLowerCase();
+        const filteredData = allWorkouts.filter(entry => {
+          return entry.movement && 
+                entry.movement !== "DAILY_MARKER" && 
+                entry.movement.toLowerCase().includes(searchTerm);
+        });
+        renderRows(filteredData);
+      });
+
+      clearBtn.addEventListener("click", () => {
+        searchInput.value = "";
+        renderRows(allWorkouts);
+      });
 
       // --- Data Fetching & Rendering ---
 
@@ -98,15 +97,10 @@
         }
 
         data.forEach((entry, index) => {
-          
           if (entry.movement === "DAILY_MARKER") {
             const bannerRow = document.createElement("tr");
-            
-            // Format the date for the banner text
             const dateText = new Date(entry.date).toLocaleDateString(undefined, {
-              weekday: 'long',
-              month: 'long',
-              day: 'numeric'
+              weekday: 'long', month: 'long', day: 'numeric'
             });
 
             bannerRow.innerHTML = `
@@ -115,11 +109,10 @@
               </td>
             `;
             tbody.appendChild(bannerRow);
-            return; // Skip the rest of the loop for this entry
+            return;
           }
           
           const row = document.createElement("tr");
-
           row.innerHTML = `
             <td>${total - index}</td>
             <td>${entry.movement}</td>
@@ -136,10 +129,12 @@
 
           const menuBtn = row.querySelector(".menu-btn");
           menuBtn.addEventListener("click", (e) => {
-            e.stopPropagation();
+            // Stop propagation so the global 'click off' listener doesn't trigger immediately
+            e.stopPropagation(); 
             const dropdown = menuBtn.nextElementSibling;
             const isOpen = dropdown.classList.contains("show");
-            closeAllDropdowns();
+            
+            closeAllDropdowns(); // Close any other open menus
             if (!isOpen) dropdown.classList.add("show");
           });
 
@@ -155,22 +150,20 @@
           row.querySelector(".swap-action").addEventListener("click", async (e) => {
             e.preventDefault();
             e.stopPropagation();
-            
             try {
-              // Call the swap function using current entry values
               await workoutService.swapWeightAndReps(entry.id, entry.weight, entry.reps);
               closeAllDropdowns();
-              loadAndRender(); // Refresh the table to show swapped values
+              loadAndRender();
             } catch (error) {
               console.error("Swap failed:", error);
               alert("Could not swap values.");
             }
           });
+
           tbody.appendChild(row);
         });
       }
 
-      // Initial Load
       loadAndRender();
     </script>
   </body>
