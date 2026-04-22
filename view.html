@@ -10,6 +10,16 @@
 
     <a href="index.html" class="page-switch">Back</a>
 
+    <div class="search-container">
+      <input 
+        type="text" 
+        id="historySearch" 
+        placeholder="Search movements..." 
+        autocomplete="off"
+      />
+      <button id="clearSearch" class="secondary-btn">Clear</button>
+    </div>
+
     <table>
       <thead>
         <tr>
@@ -25,9 +35,37 @@
     </table>
 
     <script type="module">
+
+      // Add these variables at the top of your script
+      const searchInput = document.getElementById("historySearch");
+      const clearBtn = document.getElementById("clearSearch");
+
+      // Filter function
+      searchInput.addEventListener("input", () => {
+        const searchTerm = searchInput.value.toLowerCase();
+        
+        // Filter the existing data array
+        const filteredData = allWorkouts.filter(entry => {
+          // Only search through actual workouts, skip banners
+          return entry.movement && 
+                entry.movement !== "DAILY_MARKER" && 
+                entry.movement.toLowerCase().includes(searchTerm);
+        });
+
+        // Re-render the table with the filtered results
+        renderRows(filteredData);
+      });
+
+      // Clear button logic
+      clearBtn.addEventListener("click", () => {
+        searchInput.value = "";
+        renderRows(allWorkouts); // Restore the original view
+      });
+
       import { workoutService } from "./db-service.js";
 
       const tbody = document.getElementById("workout-table-body");
+      const weightInput = document.getElementById("weight");
       let allWorkouts = [];
 
       // --- UI Helper Functions ---
@@ -90,6 +128,7 @@
             <td class="actions-cell">
               <button class="menu-btn"><span></span><span></span><span></span></button>
               <div class="dropdown-menu">
+                <a href="#" class="dropdown-item swap-action">Swap</a>
                 <a href="#" class="dropdown-item delete-action">Delete</a>
               </div>
             </td>
@@ -113,6 +152,20 @@
             }
           });
 
+          row.querySelector(".swap-action").addEventListener("click", async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            try {
+              // Call the swap function using current entry values
+              await workoutService.swapWeightAndReps(entry.id, entry.weight, entry.reps);
+              closeAllDropdowns();
+              loadAndRender(); // Refresh the table to show swapped values
+            } catch (error) {
+              console.error("Swap failed:", error);
+              alert("Could not swap values.");
+            }
+          });
           tbody.appendChild(row);
         });
       }

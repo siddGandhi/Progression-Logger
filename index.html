@@ -29,11 +29,10 @@
         required
       />
       <input
-        type="number"
+        type="text"
         inputmode="decimal"
         id="weight"
         placeholder="Weight"
-        step="0.5"
         required
       />
       <button type="submit">Log Workout</button>
@@ -55,6 +54,8 @@
         e.preventDefault();
 
         const enteredMovement = movementInput.value.trim();
+        const weightValue = parseFloat(weightInput.value); // Converts "12.5" back to a float
+
         if (!officialMovements.includes(enteredMovement)) {
           response.textContent = "Invalid movement. Please select from the list.";
           return;
@@ -64,7 +65,7 @@
           await workoutService.addWorkout(
             enteredMovement, 
             repsInput.value, 
-            weightInput.value
+            weightValue, // Send the cleaned number to Firebase
           );
           
           response.textContent = "Workout logged!";
@@ -113,6 +114,24 @@
         if (e.target !== movementInput) {
           suggestionsBox.style.display = "none";
         }
+      });
+
+      weightInput.addEventListener("input", (e) => {
+        // 1. Remove any non-numeric characters
+        let value = e.target.value.replace(/\D/g, "");
+
+        // 2. If the input is empty, clear it
+        if (!value) {
+          e.target.value = "";
+          return;
+        }
+
+        // 3. Convert string to a number and divide by 10 to shift decimal
+        // Example: "125" becomes 12.5
+        let numericValue = (parseFloat(value) / 10).toFixed(1);
+
+        // 4. Update the input field display
+        e.target.value = numericValue;
       });
     </script>
   </body>

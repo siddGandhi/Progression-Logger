@@ -9,6 +9,7 @@ import {
     limit,
     orderBy,
     doc,
+    updateDoc,
     deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
 
@@ -58,7 +59,13 @@ export const workoutService = {
         return mainDoc;
     },
 
-
+    async swapWeightAndReps(id, currentWeight, currentReps) {
+        const workoutRef = doc(db, WORKOUT_COLLECTION, id);
+        return await updateDoc(workoutRef, {
+            weight: parseFloat(currentReps), // Swap reps into weight
+            reps: Number(currentWeight)      // Swap weight into reps
+        });
+    },
 
     async getAllWorkouts() {
         const q = query(collection(db, WORKOUT_COLLECTION), orderBy("date", "desc"));

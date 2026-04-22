@@ -312,3 +312,68 @@ tr:has(.date-divider-row):hover {
 tr:has(.date-divider-row):hover {
   background-color: #f8f9fa !important;
 }
+
+.dropdown-item.swap-action {
+  color: #3498db;
+  /* Blue color for the swap action */
+  border-bottom: 1px solid #f5f5f5;
+}
+
+#weight {
+  text-align: left;
+  font-family: Arial, Helvetica, sans-serif;
+  /* Keeps numbers from jumping as you type */
+}
+
+.search-container {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+#historySearch {
+  flex: 3;
+  margin: 0;
+  /* Override default margins */
+}
+
+.secondary-btn {
+  flex: 1;
+  background-color: #95a5a6;
+  /* Gray color to distinguish from Log button */
+  margin: 0;
+  padding: 10px;
+}
+
+.secondary-btn:hover {
+  background-color: #7f8c8d;
+}
+
+
+.search-container {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  align-items: center;
+  /* Ensures they stay perfectly aligned vertically */
+}
+
+#historySearch {
+  flex: 1;
+  /* This will now take up all the remaining space */
+  margin: 0;
+}
+
+.secondary-btn {
+  flex: 0 0 auto;
+  /* Tells the button not to grow or shrink */
+  width: auto;
+  /* Makes it only as wide as the word "Clear" */
+  padding: 13px 20px;
+  /* Gives it some nice side breathing room */
+  margin: 0;
+}
+
+.secondary-btn:hover {
+  background-color: #7f8c8d;
+}
