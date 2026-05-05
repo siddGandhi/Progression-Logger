@@ -377,3 +377,81 @@ tr:has(.date-divider-row):hover {
 .secondary-btn:hover {
   background-color: #7f8c8d;
 }
+
+.graph-container {
+  overflow-x: auto;
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  margin-top: 20px;
+}
+
+.contribution-grid {
+  display: grid;
+  grid-template-flow: column;
+  grid-template-columns: repeat(53, 12px);
+  /* 53 weeks */
+  grid-template-rows: repeat(7, 12px);
+  /* 7 days */
+  gap: 3px;
+}
+
+.day-square {
+  width: 12px;
+  height: 12px;
+  background-color: #ebedf0;
+  /* Default empty day */
+  border-radius: 2px;
+}
+
+.day-square.active {
+  background-color: #3498db;
+  /* Blue for workout days */
+}
+
+.legend {
+  display: flex;
+  gap: 10px;
+  font-size: 0.8rem;
+  margin-top: 15px;
+  color: #666;
+}
+
+/* Add these updates to your <style> tag in analytics.html */
+
+.analytics-wrapper {
+  display: flex;
+  gap: 8px;
+  /* Space between labels and the grid */
+  align-items: flex-start;
+}
+
+.day-labels {
+  display: grid;
+  grid-template-rows: repeat(7, 12px);
+  /* Matches grid row height */
+  gap: 3px;
+  /* Matches grid gap */
+  font-size: 9px;
+  color: #999;
+  font-weight: bold;
+  text-align: center;
+  user-select: none;
+}
+
+.day-labels span {
+  height: 12px;
+  line-height: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Ensure the grid container doesn't have extra margins that break alignment */
+.contribution-grid {
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-columns: repeat(53, 12px);
+  grid-template-rows: repeat(7, 12px);
+  gap: 3px;
+}

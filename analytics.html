@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Workout Analytics</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+    <h2>2026 Activity</h2>
+    <a href="view.html" class="page-switch">Back to Logs</a>
+
+    <div class="graph-container">
+    <div class="analytics-wrapper">
+        <div class="day-labels">
+            <span>U</span>
+            <span>M</span>
+            <span>T</span>
+            <span>W</span>
+            <span>R</span>
+            <span>F</span>
+            <span>S</span>
+        </div>
+        
+        <div id="grid" class="contribution-grid"></div>
+    </div>
+</div>
+
+    <script type="module">
+        import { workoutService } from "./db-service.js";
+
+        async function renderAnalytics() {
+            const grid = document.getElementById("grid");
+            const allData = await workoutService.getAllWorkouts();
+            
+            // 1. Get only the session markers
+            const workoutDates = new Set(
+                allData
+                    .filter(d => d.movement === "DAILY_MARKER")
+                    .map(d => new Date(d.date).toDateString())
+            );
+
+            // 2. Setup the year view (current year 2026)
+            const year = 2026;
+            const startDate = new Date(year, 0, 1);
+            const endDate = new Date(year, 11, 31);
+            
+            // Align the first column to the correct day of the week
+            for (let i = 0; i < startDate.getDay(); i++) {
+                const empty = document.createElement("div");
+                grid.appendChild(empty);
+            }
+
+            // 3. Loop through every day of the year
+            for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+                const square = document.createElement("div");
+                square.className = "day-square";
+                
+                // If this specific date has a marker, light it up
+                if (workoutDates.has(d.toDateString())) {
+                    square.classList.add("active");
+                }
+                
+                square.title = d.toDateString(); // Show date on hover
+                grid.appendChild(square);
+            }
+        }
+
+        renderAnalytics();
+    </script>
+</body>
+</html>
