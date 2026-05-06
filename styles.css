@@ -388,20 +388,21 @@ tr:has(.date-divider-row):hover {
 
 .contribution-grid {
   display: grid;
-  grid-template-flow: column;
-  grid-template-columns: repeat(53, 12px);
-  /* 53 weeks */
-  grid-template-rows: repeat(7, 12px);
-  /* 7 days */
-  gap: 3px;
+  grid-template-columns: repeat(7, 20px);
+  grid-auto-rows: 20px;
+  /* Forces every new row to be exactly 20px high */
+  gap: 5px;
+}
+
+/* Apply the dimensions to every div inside the grid */
+.contribution-grid div {
+  width: 20px;
+  height: 20px;
+  border-radius: 3px;
 }
 
 .day-square {
-  width: 12px;
-  height: 12px;
   background-color: #ebedf0;
-  /* Default empty day */
-  border-radius: 2px;
 }
 
 .day-square.active {
@@ -409,34 +410,27 @@ tr:has(.date-divider-row):hover {
   /* Blue for workout days */
 }
 
-.legend {
-  display: flex;
-  gap: 10px;
-  font-size: 0.8rem;
-  margin-top: 15px;
-  color: #666;
-}
-
 /* Add these updates to your <style> tag in analytics.html */
 
 .analytics-wrapper {
   display: flex;
+  flex-direction: column;
+  /* Stack labels on top of the grid */
   gap: 8px;
-  /* Space between labels and the grid */
-  align-items: flex-start;
+  align-items: center;
 }
 
 .day-labels {
   display: grid;
-  grid-template-rows: repeat(7, 12px);
-  /* Matches grid row height */
-  gap: 3px;
-  /* Matches grid gap */
-  font-size: 9px;
+  grid-template-columns: repeat(7, 20px);
+  /* 7 columns for days */
+  gap: 5px;
+  font-size: 10px;
   color: #999;
   font-weight: bold;
   text-align: center;
-  user-select: none;
+  width: 170px;
+  /* (20px * 7) + (5px * 6) */
 }
 
 .day-labels span {
@@ -450,8 +444,8 @@ tr:has(.date-divider-row):hover {
 /* Ensure the grid container doesn't have extra margins that break alignment */
 .contribution-grid {
   display: grid;
-  grid-auto-flow: column;
-  grid-template-columns: repeat(53, 12px);
-  grid-template-rows: repeat(7, 12px);
-  gap: 3px;
+  /* 7 columns for days, height grows with weeks */
+  grid-template-columns: repeat(7, 20px);
+  grid-auto-rows: 20px;
+  gap: 5px;
 }
