@@ -124,22 +124,21 @@
       });
 
       weightInput.addEventListener("input", (e) => {
-        // 1. Remove any non-numeric characters
-        let value = e.target.value.replace(/\D/g, "");
+        // Allow only numbers and a single decimal point
+        let value = e.target.value;
+        
+        // Remove any character that isn't a digit or a dot
+        value = value.replace(/[^0-9.]/g, "");
 
-        // 2. If the input is empty, clear it
-        if (!value) {
-          e.target.value = "";
-          return;
+        // Prevent multiple decimal points (e.g., 12.5.5 becomes 12.55)
+        const parts = value.split(".");
+        if (parts.length > 2) {
+          value = parts[0] + "." + parts.slice(1).join("");
         }
 
-        // 3. Convert string to a number and divide by 10 to shift decimal
-        // Example: "125" becomes 12.5
-        let numericValue = (parseFloat(value) / 10).toFixed(1);
-
-        // 4. Update the input field display
-        e.target.value = numericValue;
+        e.target.value = value;
       });
+
     </script>
   </body>
 </html>

@@ -47,7 +47,7 @@ export const workoutService = {
         const workoutData = {
             movement,
             reps: Number(reps),
-            weight: parseFloat(weight),
+            weight: weight ? parseFloat(weight) : 0, // Ensure it's a number before saving
             date: new Date().toISOString()
         };
         const mainDoc = await addDoc(collection(db, WORKOUT_COLLECTION), workoutData);
