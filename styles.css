@@ -379,11 +379,13 @@ tr:has(.date-divider-row):hover {
 }
 
 .graph-container {
-  overflow-x: auto;
+  overflow: visible;
+  /* Removes the internal scroll bar */
   padding: 20px;
   background: white;
   border-radius: 8px;
   margin-top: 20px;
+  /* Remove max-height if you added one previously */
 }
 
 .contribution-grid {
@@ -416,21 +418,30 @@ tr:has(.date-divider-row):hover {
   display: flex;
   flex-direction: column;
   /* Stack labels on top of the grid */
-  gap: 8px;
+  gap: 2px;
   align-items: center;
 }
 
 .day-labels {
   display: grid;
   grid-template-columns: repeat(7, 20px);
-  /* 7 columns for days */
   gap: 5px;
   font-size: 10px;
   color: #999;
   font-weight: bold;
   text-align: center;
   width: 170px;
-  /* (20px * 7) + (5px * 6) */
+
+  position: -webkit-sticky;
+  /* Support for Safari */
+  position: sticky;
+  top: 0;
+  /* This sticks it to the very top of the screen */
+  background-color: #fff;
+  /* MUST have a solid background */
+  z-index: 100;
+  /* High z-index to stay above workout squares */
+  padding: 10px 0 5px 0;
 }
 
 .day-labels span {
@@ -448,4 +459,38 @@ tr:has(.date-divider-row):hover {
   grid-template-columns: repeat(7, 20px);
   grid-auto-rows: 20px;
   gap: 5px;
+}
+
+.not-failure-row {
+  background-color: rgba(231, 76, 60, 0.1) !important;
+  /* Very light red */
+}
+
+.intensity-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  /* Aligns items to the left */
+  gap: 10px;
+  /* Space between label and checkbox */
+  margin: 15px 0 10px 0;
+  width: 100%;
+  /* Forces container to take full form width */
+  box-sizing: border-box;
+}
+
+#failureCheck {
+  /* Keep your existing checkbox styles */
+  width: 20px !important;
+  height: 20px;
+  cursor: pointer;
+  accent-color: #3498db;
+  margin: 0;
+}
+
+.intensity-container label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #2c3e50;
+  cursor: pointer;
 }

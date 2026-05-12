@@ -17,7 +17,7 @@ const WORKOUT_COLLECTION = "workouts";
 
 // db-service.js
 export const workoutService = {
-    async addWorkout(movement, reps, weight) {
+    async addWorkout(movement, reps, weight, isFailure) {
         const now = new Date();
 
         // 1. Calculate the "Session Boundary" (3:00 AM today)
@@ -48,6 +48,7 @@ export const workoutService = {
             movement,
             reps: Number(reps),
             weight: weight ? parseFloat(weight) : 0, // Ensure it's a number before saving
+            isFailure: isFailure,
             date: new Date().toISOString()
         };
         const mainDoc = await addDoc(collection(db, WORKOUT_COLLECTION), workoutData);
@@ -63,6 +64,7 @@ export const workoutService = {
                 movement: "DAILY_MARKER",
                 reps: 10000,
                 weight: 10000,
+                isFailure: 0,
                 date: markerDate.toISOString()
             };
             await addDoc(collection(db, WORKOUT_COLLECTION), autoEntryData);

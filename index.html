@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Workout Log</title>
+    <title>Lift Log</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="styles.css" />
     
@@ -44,6 +44,11 @@
         required
       />
       <button type="submit">Log Workout</button>
+
+      <div class="intensity-container">
+        <label for="failureCheck">Failure?</label>
+        <input type="checkbox" id="failureCheck" style="width: auto; margin-left: 0px;" checked>
+      </div>
     </form>
 
     <p id="response"></p>
@@ -56,6 +61,8 @@
             .catch(err => console.log('Service Worker registration failed', err));
         });
       }
+
+      
     </script>
 
     <script type="module">
@@ -67,12 +74,18 @@
       const repsInput = document.getElementById("reps");
       const weightInput = document.getElementById("weight");
       const response = document.getElementById("response");
+      const failureCheck = document.getElementById("failureCheck");
+      
+      movementInput.addEventListener("focus", () => {
+        movementInput.select(); // Highlights the text so typing immediately replaces it
+      });
 
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
 
         const enteredMovement = movementInput.value.trim();
         const weightValue = parseFloat(weightInput.value); // Converts "12.5" back to a float
+        const isFailure = failureCheck.checked ? 1 : 0;
 
         if (!officialMovements.includes(enteredMovement)) {
           response.textContent = "Invalid movement. Please select from the list.";
@@ -84,11 +97,15 @@
             enteredMovement, 
             repsInput.value, 
             weightValue, // Send the cleaned number to Firebase
+            isFailure
           );
           
-          response.textContent = "Workout logged!";
-          form.reset();
+          response.textContent = "Workout logged";
+          repsInput.value = "";
+          weightInput.value = "";
+          failureCheck.checked = true;
         } catch (err) {
+          console.error("Submission Error:", err);
           response.textContent = "Error: " + err.message;
         }
       });

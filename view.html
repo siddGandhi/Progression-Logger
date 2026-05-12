@@ -44,13 +44,13 @@
     </table>
 
     <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js')
-            .then(reg => console.log('Service Worker registered'))
-            .catch(err => console.log('Service Worker registration failed', err));
-        });
-      }
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(reg => console.log('Service Worker registered'))
+          .catch(err => console.log('Service Worker registration failed', err));
+      });
+    }
     </script>
 
     <script type="module">
@@ -132,6 +132,11 @@
           }
           
           const row = document.createElement("tr");
+
+          if (entry.isFailure === 0) {
+            row.classList.add("not-failure-row");
+          }
+          
           row.innerHTML = `
             <td>${total - index}</td>
             <td>${entry.movement}</td>
