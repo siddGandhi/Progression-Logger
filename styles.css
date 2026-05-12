@@ -462,9 +462,11 @@ tr:has(.date-divider-row):hover {
 }
 
 .not-failure-row {
-  background-color: rgba(231, 76, 60, 0.1) !important;
-  /* Very light red */
+  /* Fades from a light red on the left to transparent (white) on the right */
+  background: linear-gradient(to right, rgba(231, 76, 60, 0.15) 5%, 25%, rgba(255, 255, 255, 0) 50%) !important;
 }
+
+/* Optional: Add a subtle red border on the far left to make it pop */
 
 .intensity-container {
   display: flex;
