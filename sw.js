@@ -14,7 +14,15 @@ const ASSETS_TO_CACHE = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
+      // We map through the array and try to add each file individually
+      return Promise.all(
+        ASSETS_TO_CACHE.map((url) => {
+          return cache.add(url).catch((error) => {
+            // This will tell you EXACTLY which file failed to download
+            console.error(`Failed to cache: ${url}`, error);
+          });
+        })
+      );
     })
   );
 });
