@@ -1,6 +1,6 @@
 const CACHE_NAME = 'progression-v1';
 const ASSETS_TO_CACHE = [
-  '/',
+  './',
   '/index.html',
   '/view.html',
   '/analytics.html',
